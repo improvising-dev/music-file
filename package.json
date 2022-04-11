@@ -1,0 +1,17 @@
+{
+  "name": "@improvising/music-file",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "author": "Improvising Rhythm Ltd.",
+  "description": "Typing and utils for MusicFile format",
+  "devDependencies": {
+    "@types/node": "^16.10.2",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.4.3"
+  },
+  "dependencies": {},
+  "scripts": {
+    "build": "rimraf dist && tsc"
+  }
+}
