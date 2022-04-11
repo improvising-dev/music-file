@@ -1,1 +1,15 @@
-export type MFInstrument = string
+export type MFInstrument =
+  | 'Piano'
+  | 'Organ'
+  | 'Guitar'
+  | 'Bass'
+  | 'Violin'
+  | 'Viola'
+  | 'Cello'
+  | 'Strings'
+  | 'Sax'
+  | 'Piccolo'
+  | 'Flute'
+  | 'Lead'
+  | 'Pad'
+  | 'Drumset'

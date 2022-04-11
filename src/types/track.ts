@@ -8,7 +8,7 @@ export interface MFTrack {
   metadata: {
     name: string
     instrument: MFInstrument
-    directive?: boolean
+    progression?: boolean
     muted?: boolean
   }
   items: MFTrackItem[]

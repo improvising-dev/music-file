@@ -18,7 +18,7 @@ export const NOTES: readonly MFNote[] = [
 
 export const NOTE_SET = new Set<MFNote>(NOTES)
 
-export const OCTAVE_NOTES = OCTAVES.reduce<MFOctavalNote[]>(
+export const OCTAVE_NOTES = OCTAVES.reduce<readonly MFOctavalNote[]>(
   (notes, octave) => [
     ...notes,
     ...NOTES.map(note => `${note}${octave}` as MFOctavalNote),
