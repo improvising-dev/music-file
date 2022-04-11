@@ -1,6 +1,7 @@
 import { MusicFileError } from '../common/error'
 import { NOTE_SET, OCTAVE_NOTE_SET } from '../constants/note'
 import { MFNote, MFOctavalNote } from '../types/note'
+import { ensureValidOctave } from './octave'
 
 export const isValidNote = (x: string): x is MFNote => {
   return NOTE_SET.has(x as MFNote)
@@ -24,4 +25,13 @@ export const ensureValidOctavalNote = (x: string) => {
   }
 
   return x
+}
+
+export const splitOctavalNote = (octavalNote: MFOctavalNote) => {
+  ensureValidOctavalNote(octavalNote)
+
+  const note = ensureValidNote(octavalNote.slice(0, -1))
+  const octave = ensureValidOctave(Number(octavalNote.slice(-1)))
+
+  return [note, octave]
 }
