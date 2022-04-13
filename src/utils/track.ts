@@ -1,7 +1,9 @@
 import { MusicFileError } from '../common/error'
+import { NOTES, NOTE_INDEX_MAP } from '../constants/note'
 import { MFTrack, MFTrackItem, MFTrackItemType } from '../types/track'
 import { isValidChord } from './chord'
 import { isValidNote } from './note'
+import { ensureValidOctave } from './octave'
 
 export const generateTrackId = () => Date.now().toString()
 export const generateTrackItemId = () => Date.now().toString()
@@ -99,6 +101,45 @@ export const getTrackItemType = (item: MFTrackItem) => {
   }
 
   throw new MusicFileError(`${item.name} is not a valid type`)
+}
+
+export const expandTrackItemLeft = (item: MFTrackItem, ticks: number) => {
+  return cloneTrackItem(item, {
+    begin: item.begin - ticks,
+    duration: item.duration + ticks,
+  })
+}
+
+export const expandTrackItemRight = (item: MFTrackItem, ticks: number) => {
+  return cloneTrackItem(item, {
+    duration: item.duration + ticks,
+  })
+}
+
+export const moveTrackItemRight = (item: MFTrackItem, ticks: number) => {
+  return cloneTrackItem(item, {
+    begin: item.begin + ticks,
+  })
+}
+
+export const moveTrackItemUp = (item: MFTrackItem, semitones: number) => {
+  if (isTrackItemTypeNote(item)) {
+    const index = NOTE_INDEX_MAP[item.name] + semitones
+    const name = index >= 0 ? NOTES[index % 12] : NOTES[12 + (index % 12)]
+    const delta = index >= 0 ? Math.floor(index / 12) : Math.ceil(index / 12)
+    const octave = ensureValidOctave(item.octave + delta)
+
+    return buildTrackItem({
+      id: item.id,
+      name,
+      octave,
+      begin: item.begin,
+      duration: item.duration,
+    })
+  } else {
+    // TODO: move chord
+    return item
+  }
 }
 
 export const getTrackOps = (track: MFTrack) => {

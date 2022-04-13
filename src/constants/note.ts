@@ -18,6 +18,11 @@ export const NOTES: readonly MFNote[] = [
 
 export const NOTE_SET = new Set<MFNote>(NOTES)
 
+export const NOTE_INDEX_MAP = NOTES.reduce((prev, curr, index) => {
+  prev[curr] = index
+  return prev
+}, {} as Record<MFNote, number>)
+
 export const OCTAVE_NOTES = OCTAVES.reduce<readonly MFOctavalNote[]>(
   (notes, octave) => [
     ...notes,
@@ -27,3 +32,11 @@ export const OCTAVE_NOTES = OCTAVES.reduce<readonly MFOctavalNote[]>(
 )
 
 export const OCTAVE_NOTE_SET = new Set<MFOctavalNote>(OCTAVE_NOTES)
+
+export const OCTAVE_NOTE_INDEX_MAP = OCTAVE_NOTES.reduce(
+  (prev, curr, index) => {
+    prev[curr] = index
+    return prev
+  },
+  {} as Record<MFOctavalNote, number>,
+)
