@@ -36,7 +36,7 @@ export const CHORDS: readonly MFChord[] = [
 
 export const CHORD_SET = new Set<MFChord>(CHORDS)
 
-export const CHORD_NOTE_MAP: Record<MFChord, readonly MFNote[]> = {
+export const CHORD_NOTES_MAP: Record<MFChord, readonly MFNote[]> = {
   I: ['do', 'mi', 'sol'],
   II: ['re', 'fa#', 'la'],
   III: ['mi', 'sol#', 'ti'],
