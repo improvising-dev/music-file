@@ -23,7 +23,7 @@ export const isChordTrackItem = (
   return isValidChord(item.name)
 }
 
-export const ensureTrackItemTypeNote = (item: MFTrackItem) => {
+export const ensureNoteTrackItem = (item: MFTrackItem) => {
   if (!isNoteTrackItem(item)) {
     throw new MusicFileError(`${item.name} is not a valid note`)
   }
@@ -31,7 +31,7 @@ export const ensureTrackItemTypeNote = (item: MFTrackItem) => {
   return item
 }
 
-export const ensureTrackItemTypeChord = (item: MFTrackItem) => {
+export const ensureChordTrackItem = (item: MFTrackItem) => {
   if (!isChordTrackItem(item)) {
     throw new MusicFileError(`${item.name} is not a valid chord`)
   }
