@@ -22,7 +22,5 @@ export interface MFTrackItem {
   duration: number
 }
 
-export namespace MFTrackItemType {
-  export type Note = MFTrackItem & { name: MFNote }
-  export type Chord = MFTrackItem & { name: MFChord }
-}
+export type MFNoteTrackItem = MFTrackItem & { name: MFNote }
+export type MFChordTrackItem = MFTrackItem & { name: MFChord }

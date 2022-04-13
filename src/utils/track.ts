@@ -1,6 +1,11 @@
 import { MusicFileError } from '../common/error'
 import { NOTES, NOTE_INDEX_MAP } from '../constants/note'
-import { MFTrack, MFTrackItem, MFTrackItemType } from '../types/track'
+import {
+  MFTrack,
+  MFTrackItem,
+  MFNoteTrackItem,
+  MFChordTrackItem,
+} from '../types/track'
 import { isValidChord } from './chord'
 import { isValidNote } from './note'
 import { ensureValidOctave } from './octave'
@@ -8,20 +13,18 @@ import { ensureValidOctave } from './octave'
 export const generateTrackId = () => Date.now().toString()
 export const generateTrackItemId = () => Date.now().toString()
 
-export const isTrackItemTypeNote = (
-  item: MFTrackItem,
-): item is MFTrackItemType.Note => {
+export const isNoteTrackItem = (item: MFTrackItem): item is MFNoteTrackItem => {
   return isValidNote(item.name)
 }
 
-export const isTrackItemTypeChord = (
+export const isChordTrackItem = (
   item: MFTrackItem,
-): item is MFTrackItemType.Chord => {
+): item is MFChordTrackItem => {
   return isValidChord(item.name)
 }
 
 export const ensureTrackItemTypeNote = (item: MFTrackItem) => {
-  if (!isTrackItemTypeNote(item)) {
+  if (!isNoteTrackItem(item)) {
     throw new MusicFileError(`${item.name} is not a valid note`)
   }
 
@@ -29,7 +32,7 @@ export const ensureTrackItemTypeNote = (item: MFTrackItem) => {
 }
 
 export const ensureTrackItemTypeChord = (item: MFTrackItem) => {
-  if (!isTrackItemTypeChord(item)) {
+  if (!isChordTrackItem(item)) {
     throw new MusicFileError(`${item.name} is not a valid chord`)
   }
 
@@ -92,11 +95,11 @@ export const cloneTrackItem = (
 }
 
 export const getTrackItemType = (item: MFTrackItem) => {
-  if (isTrackItemTypeNote(item)) {
+  if (isNoteTrackItem(item)) {
     return 'note'
   }
 
-  if (isTrackItemTypeChord(item)) {
+  if (isChordTrackItem(item)) {
     return 'chord'
   }
 
@@ -123,7 +126,7 @@ export const moveTrackItemRight = (item: MFTrackItem, ticks: number) => {
 }
 
 export const moveTrackItemUp = (item: MFTrackItem, semitones: number) => {
-  if (isTrackItemTypeNote(item)) {
+  if (isNoteTrackItem(item)) {
     const index = NOTE_INDEX_MAP[item.name] + semitones
     const name = index >= 0 ? NOTES[index % 12] : NOTES[12 + (index % 12)]
     const delta = index >= 0 ? Math.floor(index / 12) : Math.ceil(index / 12)
