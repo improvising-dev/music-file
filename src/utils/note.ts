@@ -21,17 +21,17 @@ export const ensureValidNote = (x: string) => {
 
 export const ensureValidOctaveNote = (x: string) => {
   if (!isValidOctaveNote(x)) {
-    throw new MusicFileError(`${x} is not a valid octaval note`)
+    throw new MusicFileError(`${x} is not a valid octave note`)
   }
 
   return x
 }
 
-export const splitOctaveNote = (octavalNote: MFOctaveNote) => {
-  ensureValidOctaveNote(octavalNote)
+export const splitOctaveNote = (octaveNote: MFOctaveNote) => {
+  ensureValidOctaveNote(octaveNote)
 
-  const note = ensureValidNote(octavalNote.slice(0, -1))
-  const octave = ensureValidOctave(Number(octavalNote.slice(-1)))
+  const note = ensureValidNote(octaveNote.slice(0, -1))
+  const octave = ensureValidOctave(Number(octaveNote.slice(-1)))
 
   return [note, octave]
 }
