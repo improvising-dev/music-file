@@ -14,4 +14,4 @@ export type MFNote =
   | 'la#'
   | 'ti'
 
-export type MFOctavalNote = `${MFNote}${MFOctave}`
+export type MFOctaveNote = `${MFNote}${MFOctave}`
