@@ -1,10 +1,10 @@
 import { MusicFileError } from '../common/error'
 import { NOTES, NOTE_INDEX_MAP } from '../constants/note'
 import {
+  MFChordTrackItem,
+  MFNoteTrackItem,
   MFTrack,
   MFTrackItem,
-  MFNoteTrackItem,
-  MFChordTrackItem,
 } from '../types/track'
 import { isValidChord } from './chord'
 import { isValidNote } from './note'
@@ -128,8 +128,12 @@ export const moveTrackItemRight = (item: MFTrackItem, ticks: number) => {
 export const moveTrackItemUp = (item: MFTrackItem, semitones: number) => {
   if (isNoteTrackItem(item)) {
     const index = NOTE_INDEX_MAP[item.name] + semitones
-    const name = index >= 0 ? NOTES[index % 12] : NOTES[12 + (index % 12)]
-    const delta = index >= 0 ? Math.floor(index / 12) : Math.ceil(index / 12)
+    const name =
+      index >= 0
+        ? NOTES[index % NOTES.length]
+        : NOTES[NOTES.length + (index % NOTES.length)]
+
+    const delta = Math.floor(index / NOTES.length)
     const octave = ensureValidOctave(item.octave + delta)
 
     return buildTrackItem({
@@ -139,10 +143,9 @@ export const moveTrackItemUp = (item: MFTrackItem, semitones: number) => {
       begin: item.begin,
       duration: item.duration,
     })
-  } else {
-    // TODO: move chord
-    return item
   }
+
+  return item
 }
 
 export const getTrackOps = (track: MFTrack) => {

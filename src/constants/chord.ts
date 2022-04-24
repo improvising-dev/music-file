@@ -36,6 +36,11 @@ export const CHORDS: readonly MFChord[] = [
 
 export const CHORD_SET = new Set<MFChord>(CHORDS)
 
+export const CHORD_INDEX_MAP = CHORDS.reduce((prev, curr, index) => {
+  prev[curr] = index
+  return prev
+}, {} as Record<MFChord, number>)
+
 export const CHORD_NOTES_MAP: Record<MFChord, readonly MFNote[]> = {
   I: ['do', 'mi', 'sol'],
   II: ['re', 'fa#', 'la'],
