@@ -1,4 +1,5 @@
 export * from './common/error'
+export * from './common/random'
 export * from './constants/chord'
 export * from './constants/instrument'
 export * from './constants/key'

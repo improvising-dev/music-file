@@ -1,4 +1,6 @@
 import { MusicFileError } from '../common/error'
+import { generateRandomId } from '../common/random'
+import { CHORD_NOTES_MAP } from '../constants/chord'
 import { NOTES, NOTE_INDEX_MAP } from '../constants/note'
 import {
   MFChordTrackItem,
@@ -10,8 +12,8 @@ import { isValidChord } from './chord'
 import { isValidNote } from './note'
 import { ensureValidOctave } from './octave'
 
-export const generateTrackId = () => Date.now().toString()
-export const generateTrackItemId = () => Date.now().toString()
+export const generateTrackId = () => generateRandomId()
+export const generateTrackItemId = () => generateRandomId()
 
 export const isNoteTrackItem = (item: MFTrackItem): item is MFNoteTrackItem => {
   return isValidNote(item.name)
@@ -149,7 +151,7 @@ export const moveTrackItemUp = (item: MFTrackItem, semitones: number) => {
 }
 
 export const getTrackOps = (track: MFTrack) => {
-  const findOverlayTrackItem = (source: MFTrackItem) => {
+  const findOverlapTrackItem = (source: MFTrackItem) => {
     return track.items.find(item => isTrackItemOverlap(source, item))
   }
 
@@ -157,6 +159,10 @@ export const getTrackOps = (track: MFTrack) => {
     track.items.sort((a, b) => {
       return a.begin < b.begin ? -1 : 1
     })
+  }
+
+  const clearTrackItems = () => {
+    track.items = []
   }
 
   const addTrackItem = (source: MFTrackItem) => {
@@ -189,8 +195,9 @@ export const getTrackOps = (track: MFTrack) => {
   }
 
   return {
-    findOverlayTrackItem,
+    findOverlapTrackItem,
     sortTrackItems,
+    clearTrackItems,
     addTrackItem,
     deleteTrackItem,
     replaceTrackItem,
