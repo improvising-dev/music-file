@@ -130,11 +130,7 @@ export const moveTrackItemRight = (item: MFTrackItem, ticks: number) => {
 export const moveTrackItemUp = (item: MFTrackItem, semitones: number) => {
   if (isNoteTrackItem(item)) {
     const index = NOTE_INDEX_MAP[item.name] + semitones
-    const name =
-      index >= 0
-        ? NOTES[index % NOTES.length]
-        : NOTES[NOTES.length + (index % NOTES.length)]
-
+    const name = NOTES.slice(index % NOTES.length)[0]
     const delta = Math.floor(index / NOTES.length)
     const octave = ensureValidOctave(item.octave + delta)
 
