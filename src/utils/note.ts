@@ -33,5 +33,5 @@ export const splitOctaveNote = (octaveNote: MFOctaveNote) => {
   const note = ensureValidNote(octaveNote.slice(0, -1))
   const octave = ensureValidOctave(Number(octaveNote.slice(-1)))
 
-  return [note, octave]
+  return [note, octave] as const
 }
