@@ -24,16 +24,16 @@ export const getChordOctaveNotes = (chord: MFChord, baseOctave: MFOctave) => {
   const octaveNotes: MFOctaveNote[] = []
 
   let octave = baseOctave
-  let lastNoteIndex = NOTE_INDEX_MAP[notes[0]]
+  let lastNoteIndex = -1
 
   for (const note of notes) {
-    const currentNoteIndex = NOTE_INDEX_MAP[note]
+    const noteIndex = NOTE_INDEX_MAP[note]
 
-    if (currentNoteIndex < lastNoteIndex) {
+    if (noteIndex < lastNoteIndex) {
       octave = ensureValidOctave(Math.min(octave + 1, MAX_OCTAVE))
     }
 
-    lastNoteIndex = currentNoteIndex
+    lastNoteIndex = noteIndex
 
     octaveNotes.push(`${note}${octave}`)
   }
