@@ -7,6 +7,7 @@ import {
   MFNoteTrackItem,
   MFTrack,
   MFTrackItem,
+  MFTrackItemType,
 } from '../types/track'
 import { isValidChord } from './chord'
 import { isValidNote } from './note'
@@ -96,7 +97,7 @@ export const cloneTrackItem = (
   }
 }
 
-export const getTrackItemType = (item: MFTrackItem) => {
+export const getTrackItemType = (item: MFTrackItem): MFTrackItemType => {
   if (isNoteTrackItem(item)) {
     return 'note'
   }
@@ -152,7 +153,7 @@ export const getTrackOps = (track: MFTrack) => {
   }
 
   const sortTrackItems = () => {
-    track.items.sort((a, b) => {
+    return track.items.sort((a, b) => {
       return a.begin < b.begin ? -1 : 1
     })
   }

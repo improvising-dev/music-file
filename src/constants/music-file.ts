@@ -1,6 +1,6 @@
 import { MFMusicFile } from '../types/music-file'
 
-export const INITIAL_MUSIC_FILE: MFMusicFile = {
+export const DEFAULT_MUSIC_FILE: MFMusicFile = {
   metadata: {
     name: 'Untitled',
     key: 'C',
