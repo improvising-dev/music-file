@@ -1,6 +1,12 @@
 import { MusicFileError } from '../common/error'
-import { NOTE_SET, OCTAVE_NOTE_SET } from '../constants/note'
+import {
+  NOTE_INDEX_MAP,
+  NOTE_SET,
+  OCTAVE_NOTE_INDEX_MAP,
+  OCTAVE_NOTE_SET,
+} from '../constants/note'
 import { MFNote, MFOctaveNote } from '../types/note'
+import { MFOctave } from '../types/octave'
 import { ensureValidOctave } from './octave'
 
 export const isValidNote = (x: string): x is MFNote => {
@@ -25,6 +31,25 @@ export const ensureValidOctaveNote = (x: string) => {
   }
 
   return x
+}
+
+export const isAccidentalNote = (note: MFNote | MFOctaveNote) => {
+  return note.includes('#')
+}
+
+export const getNoteIndex = (note: MFNote) => {
+  return NOTE_INDEX_MAP[note]
+}
+
+export const getOctaveNoteIndex = (octaveNote: MFOctaveNote) => {
+  return OCTAVE_NOTE_INDEX_MAP[octaveNote]
+}
+
+export const buildOctaveNote = (
+  note: MFNote,
+  octave: MFOctave,
+): MFOctaveNote => {
+  return `${note}${octave}`
 }
 
 export const splitOctaveNote = (octaveNote: MFOctaveNote) => {

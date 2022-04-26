@@ -19,8 +19,12 @@ export const ensureValidChord = (x: string) => {
   return x
 }
 
+export const getChordNotes = (chord: MFChord) => {
+  return CHORD_NOTES_MAP[chord]
+}
+
 export const getChordOctaveNotes = (chord: MFChord, baseOctave: MFOctave) => {
-  const notes = CHORD_NOTES_MAP[chord]
+  const notes = getChordNotes(chord)
   const octaveNotes: MFOctaveNote[] = []
 
   let octave = baseOctave
