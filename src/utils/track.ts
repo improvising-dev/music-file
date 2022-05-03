@@ -13,6 +13,8 @@ import { isValidChord } from './chord'
 import { isValidNote } from './note'
 import { ensureValidOctave } from './octave'
 
+type Optional<T, P extends keyof T> = Omit<T, P> & { [K in P]?: T[K] }
+
 export const generateTrackId = () => generateRandomId()
 export const generateTrackItemId = () => generateRandomId()
 
@@ -60,7 +62,7 @@ export const buildTrack = ({
   id,
   metadata,
   items = [],
-}: Omit<MFTrack, 'id'> & { id?: string }): MFTrack => {
+}: Optional<MFTrack, 'id' | 'items'>): MFTrack => {
   return {
     id: id ?? generateTrackId(),
     metadata,
@@ -74,7 +76,7 @@ export const buildTrackItem = ({
   octave,
   begin,
   duration,
-}: Omit<MFTrackItem, 'id'> & { id?: string }): MFTrackItem => {
+}: Optional<MFTrackItem, 'id'>): MFTrackItem => {
   return {
     id: id ?? generateTrackItemId(),
     name,
