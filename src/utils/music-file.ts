@@ -42,6 +42,10 @@ export const getMusicFileOps = (musicFile: MFMusicFile) => {
     return tracks.find(track => track.metadata.progression)
   }
 
+  const findProgressionTrackNum = () => {
+    return tracks.findIndex(track => track.metadata.progression)
+  }
+
   const findMutedTracks = () => {
     return tracks.filter(track => track.metadata.muted)
   }
@@ -94,6 +98,7 @@ export const getMusicFileOps = (musicFile: MFMusicFile) => {
     getNumTicks,
     getTickMs,
     findProgressionTrack,
+    findProgressionTrackNum,
     findMutedTracks,
     findUnmutedTracks,
     sortTracks,
