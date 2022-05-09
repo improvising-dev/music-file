@@ -1,6 +1,6 @@
+import { hasInteraction } from '../common/algorithm'
 import { MusicFileError } from '../common/error'
 import { generateRandomId } from '../common/random'
-import { CHORD_NOTES_MAP } from '../constants/chord'
 import { NOTES, NOTE_INDEX_MAP } from '../constants/note'
 import {
   MFChordTrackItem,
@@ -9,8 +9,8 @@ import {
   MFTrackItem,
   MFTrackItemType,
 } from '../types/track'
-import { isValidChord } from './chord'
-import { isValidNote } from './note'
+import { getChordOctaveNotes, getChordSpan, isValidChord } from './chord'
+import { buildOctaveNote, isValidNote } from './note'
 import { ensureValidOctave } from './octave'
 
 type Optional<T, P extends keyof T> = Omit<T, P> & { [K in P]?: T[K] }
@@ -44,8 +44,8 @@ export const ensureChordTrackItem = (item: MFTrackItem) => {
   return item
 }
 
-export const isTrackItemOverlap = (a: MFTrackItem, b: MFTrackItem) => {
-  if (a.id === b.id || a.octave !== b.octave || a.name !== b.name) {
+export const isTrackItemTicksOverlapped = (a: MFTrackItem, b: MFTrackItem) => {
+  if (a.id === b.id) {
     return false
   }
 
@@ -56,6 +56,31 @@ export const isTrackItemOverlap = (a: MFTrackItem, b: MFTrackItem) => {
     (rangeA[0] <= rangeB[0] && rangeA[1] > rangeB[0]) ||
     (rangeB[0] <= rangeA[0] && rangeB[1] > rangeA[0])
   )
+}
+
+export const isTrackItemOverlapped = (a: MFTrackItem, b: MFTrackItem) => {
+  if (a.id === b.id) {
+    return false
+  }
+
+  const hasNameInteraction = hasInteraction(
+    isChordTrackItem(a)
+      ? getChordOctaveNotes(a.name, a.octave)
+      : isNoteTrackItem(a)
+      ? [buildOctaveNote(a.name, a.octave)]
+      : [],
+    isChordTrackItem(b)
+      ? getChordOctaveNotes(b.name, b.octave)
+      : isNoteTrackItem(b)
+      ? [buildOctaveNote(b.name, b.octave)]
+      : [],
+  )
+
+  if (!hasNameInteraction) {
+    return false
+  }
+
+  return isTrackItemTicksOverlapped(a, b)
 }
 
 export const buildTrack = ({
@@ -150,8 +175,16 @@ export const moveTrackItemUp = (item: MFTrackItem, semitones: number) => {
 }
 
 export const getTrackOps = (track: MFTrack) => {
-  const findOverlapTrackItem = (source: MFTrackItem) => {
-    return track.items.find(item => isTrackItemOverlap(source, item))
+  const findOverlappedTrackItem = (source: MFTrackItem) => {
+    return track.items.find(item => isTrackItemOverlapped(source, item))
+  }
+
+  const findOverlappedTrackItems = (source: MFTrackItem) => {
+    return track.items.filter(item => isTrackItemOverlapped(source, item))
+  }
+
+  const findTicksOverlappedTrackItems = (source: MFTrackItem) => {
+    return track.items.filter(item => isTrackItemTicksOverlapped(source, item))
   }
 
   const sortTrackItems = () => {
@@ -194,7 +227,9 @@ export const getTrackOps = (track: MFTrack) => {
   }
 
   return {
-    findOverlapTrackItem,
+    findOverlappedTrackItem,
+    findOverlappedTrackItems,
+    findTicksOverlappedTrackItems,
     sortTrackItems,
     clearTrackItems,
     addTrackItem,

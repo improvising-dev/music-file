@@ -32,10 +32,7 @@ export const getMusicFileOps = (musicFile: MFMusicFile) => {
   }
 
   const getTickMs = () => {
-    const numTicksPerBeat = getNumTicksPerBeat()
-    const tickMs = (60 * 1000) / (numTicksPerBeat * bpm)
-
-    return tickMs
+    return (60 * 1000) / (getNumTicksPerBeat() * bpm)
   }
 
   const findProgressionTrack = () => {

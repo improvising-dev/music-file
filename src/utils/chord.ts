@@ -1,7 +1,7 @@
 import { MusicFileError } from '../common/error'
 import { CHORD_NOTES_MAP, CHORD_SET } from '../constants/chord'
-import { NOTE_INDEX_MAP } from '../constants/note'
-import { MAX_OCTAVE } from '../constants/octave'
+import { NOTE_INDEX_MAP, OCTAVE_NOTE_INDEX_MAP } from '../constants/note'
+import { MAX_OCTAVE, MIN_OCTAVE } from '../constants/octave'
 import { MFChord } from '../types/chord'
 import { MFOctaveNote } from '../types/note'
 import { MFOctave } from '../types/octave'
@@ -43,4 +43,12 @@ export const getChordOctaveNotes = (chord: MFChord, baseOctave: MFOctave) => {
   }
 
   return octaveNotes
+}
+
+export const getChordSpan = (chord: MFChord) => {
+  const octaveNotes = getChordOctaveNotes(chord, MIN_OCTAVE)
+  const top = OCTAVE_NOTE_INDEX_MAP[octaveNotes[octaveNotes.length - 1]]
+  const bottom = OCTAVE_NOTE_INDEX_MAP[octaveNotes[0]]
+
+  return top - bottom + 1
 }

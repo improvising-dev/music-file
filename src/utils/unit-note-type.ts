@@ -13,13 +13,3 @@ export const ensureValidUnitNoteType = (x: number) => {
 
   return x
 }
-
-export const getUnitNoteTypeOps = (unt: MFUnitNoteType) => {
-  const toMs = (ticks: number) => {}
-  const toTick = (ms: number) => {}
-
-  return {
-    toMs,
-    toTick,
-  }
-}
