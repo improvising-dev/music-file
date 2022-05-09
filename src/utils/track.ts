@@ -9,7 +9,7 @@ import {
   MFTrackItem,
   MFTrackItemType,
 } from '../types/track'
-import { getChordOctaveNotes, getChordSpan, isValidChord } from './chord'
+import { getChordOctaveNotes, isValidChord } from './chord'
 import { buildOctaveNote, isValidNote } from './note'
 import { ensureValidOctave } from './octave'
 

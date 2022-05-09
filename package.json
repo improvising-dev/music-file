@@ -1,9 +1,9 @@
 {
   "name": "@improvising/music-file",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "main": "dist/index.js",
   "license": "MIT",
-  "author": "Improvising Rhythm Ltd.",
+  "author": "Improvising",
   "description": "Typing and utils for MusicFile format",
   "devDependencies": {
     "@types/node": "^16.10.2",
