@@ -183,6 +183,10 @@ export const getTrackOps = (track: MFTrack) => {
     return track.items.filter(item => isTrackItemOverlapped(source, item))
   }
 
+  const findTicksOverlappedTrackItem = (source: MFTrackItem) => {
+    return track.items.find(item => isTrackItemTicksOverlapped(source, item))
+  }
+
   const findTicksOverlappedTrackItems = (source: MFTrackItem) => {
     return track.items.filter(item => isTrackItemTicksOverlapped(source, item))
   }
@@ -229,6 +233,7 @@ export const getTrackOps = (track: MFTrack) => {
   return {
     findOverlappedTrackItem,
     findOverlappedTrackItems,
+    findTicksOverlappedTrackItem,
     findTicksOverlappedTrackItems,
     sortTrackItems,
     clearTrackItems,
