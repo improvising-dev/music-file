@@ -44,6 +44,22 @@ export const ensureChordTrackItem = (item: MFTrackItem) => {
   return item
 }
 
+export const compareTrackItem = (a: MFTrackItem, b: MFTrackItem) => {
+  if (a.begin === b.begin) {
+    if (a.duration === b.duration) {
+      if (a.id === b.id) {
+        return 0
+      }
+
+      return a.id < b.id ? -1 : 1
+    }
+
+    return a.duration < b.duration ? -1 : 1
+  } else {
+    return a.begin < b.begin ? -1 : 1
+  }
+}
+
 export const isTrackItemTicksOverlapped = (a: MFTrackItem, b: MFTrackItem) => {
   if (a.id === b.id) {
     return false
@@ -192,9 +208,7 @@ export const getTrackOps = (track: MFTrack) => {
   }
 
   const sortTrackItems = () => {
-    return track.items.sort((a, b) => {
-      return a.begin < b.begin ? -1 : 1
-    })
+    return track.items.sort(compareTrackItem)
   }
 
   const clearTrackItems = () => {
@@ -206,8 +220,17 @@ export const getTrackOps = (track: MFTrack) => {
       track.items.unshift(source)
     } else {
       for (let i = 0; i < track.items.length; i++) {
-        if (track.items[i].begin <= source.begin) {
-          track.items.splice(i, 0, source)
+        const item = track.items[i]
+
+        if (item.begin <= source.begin) {
+          const result = compareTrackItem(item, source)
+
+          if (result < 0) {
+            track.items.splice(i + 1, 0, source)
+          } else {
+            track.items.splice(i, 0, source)
+          }
+
           return
         }
       }
