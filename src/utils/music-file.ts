@@ -6,6 +6,7 @@ import { MFTrack } from '../types/track'
 import { MFUnitNoteType } from '../types/unit-note-type'
 
 export interface FindTrackParams {
+  id?: string
   instrument?: MFInstrument
   muted?: boolean
   category?: string
@@ -114,8 +115,9 @@ export const getMusicFileOps = (musicFile: MFMusicFile) => {
 
   const setNumBars = (numBars: number) => {
     const lastItem = getLastTrackItem()
+    const updatedNumTicks = getNumTicks() - getNumTicksPerBar()
 
-    if (lastItem.begin + lastItem.duration <= numBars) {
+    if (lastItem.begin + lastItem.duration <= updatedNumTicks) {
       musicFile.metadata.numBars = numBars
     }
   }
@@ -125,11 +127,16 @@ export const getMusicFileOps = (musicFile: MFMusicFile) => {
   }
 
   const findTracks = ({
+    id,
     instrument,
     muted,
     category,
   }: FindTrackParams = {}) => {
     return musicFile.tracks.filter(track => {
+      if (id !== undefined && track.id !== id) {
+        return false
+      }
+
       if (
         instrument !== undefined &&
         instrument !== track.metadata.instrument
@@ -159,8 +166,10 @@ export const getMusicFileOps = (musicFile: MFMusicFile) => {
     return tracks[0]
   }
 
-  const findTrackNum = (source: MFTrack) => {
-    return musicFile.tracks.findIndex(track => track.id === source.id)
+  const findTrackNum = (params: FindTrackParams = {}) => {
+    const source = findTrack(params)
+
+    return musicFile.tracks.findIndex(track => track === source)
   }
 
   const addTrack = (source: MFTrack) => {
