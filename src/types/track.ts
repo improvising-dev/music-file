@@ -8,8 +8,8 @@ export interface MFTrack {
   metadata: {
     name: string
     instrument: MFInstrument
-    progression?: boolean
     muted?: boolean
+    category?: string
   }
   items: MFTrackItem[]
 }

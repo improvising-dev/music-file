@@ -2,6 +2,7 @@ import { hasInteraction } from '../common/algorithm'
 import { MusicFileError } from '../common/error'
 import { generateRandomId } from '../common/random'
 import { NOTES, NOTE_INDEX_MAP } from '../constants/note'
+import { MFInstrument } from '../types/instrument'
 import {
   MFChordTrackItem,
   MFNoteTrackItem,
@@ -17,6 +18,59 @@ type Optional<T, P extends keyof T> = Omit<T, P> & { [K in P]?: T[K] }
 
 export const generateTrackId = () => generateRandomId()
 export const generateTrackItemId = () => generateRandomId()
+
+export const buildTrack = ({
+  id,
+  metadata,
+  items = [],
+}: Optional<MFTrack, 'id' | 'items'>): MFTrack => {
+  return {
+    id: id ?? generateTrackId(),
+    metadata,
+    items,
+  }
+}
+
+export const buildTrackItem = ({
+  id,
+  name,
+  octave,
+  begin,
+  duration,
+}: Optional<MFTrackItem, 'id'>): MFTrackItem => {
+  return {
+    id: id ?? generateTrackItemId(),
+    name,
+    octave,
+    begin,
+    duration,
+  }
+}
+
+export const cloneTrackItem = (
+  item: MFTrackItem,
+  { id, name, octave, begin, duration }: Partial<MFTrackItem> = {},
+): MFTrackItem => {
+  return {
+    id: id ?? item.id,
+    name: name ?? item.name,
+    octave: octave ?? item.octave,
+    begin: begin ?? item.begin,
+    duration: duration ?? item.duration,
+  }
+}
+
+export const getTrackItemType = (item: MFTrackItem): MFTrackItemType => {
+  if (isNoteTrackItem(item)) {
+    return 'note'
+  }
+
+  if (isChordTrackItem(item)) {
+    return 'chord'
+  }
+
+  throw new MusicFileError(`${item.name} is not a valid type`)
+}
 
 export const isNoteTrackItem = (item: MFTrackItem): item is MFNoteTrackItem => {
   return isValidNote(item.name)
@@ -99,59 +153,6 @@ export const isTrackItemOverlapped = (a: MFTrackItem, b: MFTrackItem) => {
   return isTrackItemTicksOverlapped(a, b)
 }
 
-export const buildTrack = ({
-  id,
-  metadata,
-  items = [],
-}: Optional<MFTrack, 'id' | 'items'>): MFTrack => {
-  return {
-    id: id ?? generateTrackId(),
-    metadata,
-    items,
-  }
-}
-
-export const buildTrackItem = ({
-  id,
-  name,
-  octave,
-  begin,
-  duration,
-}: Optional<MFTrackItem, 'id'>): MFTrackItem => {
-  return {
-    id: id ?? generateTrackItemId(),
-    name,
-    octave,
-    begin,
-    duration,
-  }
-}
-
-export const cloneTrackItem = (
-  item: MFTrackItem,
-  { id, name, octave, begin, duration }: Partial<MFTrackItem> = {},
-): MFTrackItem => {
-  return {
-    id: id ?? item.id,
-    name: name ?? item.name,
-    octave: octave ?? item.octave,
-    begin: begin ?? item.begin,
-    duration: duration ?? item.duration,
-  }
-}
-
-export const getTrackItemType = (item: MFTrackItem): MFTrackItemType => {
-  if (isNoteTrackItem(item)) {
-    return 'note'
-  }
-
-  if (isChordTrackItem(item)) {
-    return 'chord'
-  }
-
-  throw new MusicFileError(`${item.name} is not a valid type`)
-}
-
 export const expandTrackItemLeft = (item: MFTrackItem, ticks: number) => {
   return cloneTrackItem(item, {
     begin: item.begin - ticks,
@@ -191,6 +192,38 @@ export const moveTrackItemUp = (item: MFTrackItem, semitones: number) => {
 }
 
 export const getTrackOps = (track: MFTrack) => {
+  const getName = () => {
+    return track.metadata.name
+  }
+
+  const getInstrument = () => {
+    return track.metadata.instrument
+  }
+
+  const getMuted = () => {
+    return Boolean(track.metadata.muted)
+  }
+
+  const getCategory = () => {
+    return track.metadata.category
+  }
+
+  const setName = (name: string) => {
+    track.metadata.name = name
+  }
+
+  const setInstrument = (instrument: MFInstrument) => {
+    track.metadata.instrument = instrument
+  }
+
+  const setMuted = (muted: boolean) => {
+    track.metadata.muted = muted
+  }
+
+  const setCategory = (category: string) => {
+    track.metadata.category = category
+  }
+
   const findOverlappedTrackItem = (source: MFTrackItem) => {
     return track.items.find(item => isTrackItemOverlapped(source, item))
   }
@@ -254,6 +287,14 @@ export const getTrackOps = (track: MFTrack) => {
   }
 
   return {
+    getName,
+    getInstrument,
+    getMuted,
+    getCategory,
+    setName,
+    setInstrument,
+    setMuted,
+    setCategory,
     findOverlappedTrackItem,
     findOverlappedTrackItems,
     findTicksOverlappedTrackItem,

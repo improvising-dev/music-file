@@ -1,75 +1,176 @@
+import { MFInstrument } from '../types/instrument'
+import { MFKey } from '../types/key'
 import { MFMusicFile } from '../types/music-file'
+import { MFSignature } from '../types/signature'
 import { MFTrack } from '../types/track'
+import { MFUnitNoteType } from '../types/unit-note-type'
+
+export interface FindTrackParams {
+  instrument?: MFInstrument
+  muted?: boolean
+  category?: string
+}
 
 export const cloneMusicFile = (source: MFMusicFile): MFMusicFile => {
   return JSON.parse(JSON.stringify(source))
 }
 
 export const getMusicFileOps = (musicFile: MFMusicFile) => {
-  const { metadata, tracks } = musicFile
-  const { signature, unitNoteType, bpm, numBars } = metadata
+  const getName = () => {
+    return musicFile.metadata.name
+  }
 
-  const [numBeats, beatNoteType] = signature
+  const getKey = () => {
+    return musicFile.metadata.key
+  }
 
-  const getBeatNoteType = () => {
-    return beatNoteType
+  const getSignature = () => {
+    return musicFile.metadata.signature
   }
 
   const getNumBeats = () => {
-    return numBeats
+    return musicFile.metadata.signature[0]
+  }
+
+  const getBeatNoteType = () => {
+    return musicFile.metadata.signature[1]
+  }
+
+  const getUnitNoteType = () => {
+    return musicFile.metadata.unitNoteType
+  }
+
+  const getBPM = () => {
+    return musicFile.metadata.bpm
+  }
+
+  const getNumBars = () => {
+    return musicFile.metadata.numBars
   }
 
   const getNumTicksPerBeat = () => {
-    return unitNoteType / beatNoteType
+    return getUnitNoteType() / getBeatNoteType()
   }
 
   const getNumTicksPerBar = () => {
-    return numBeats * getNumTicksPerBeat()
+    return getNumBeats() * getNumTicksPerBeat()
   }
 
   const getNumTicks = () => {
-    return numBars * getNumTicksPerBar()
+    return getNumBars() * getNumTicksPerBar()
   }
 
   const getTickMs = () => {
-    return (60 * 1000) / (getNumTicksPerBeat() * bpm)
+    return (60 * 1000) / (getNumTicksPerBeat() * getBPM())
   }
 
-  const findProgressionTrack = () => {
-    return tracks.find(track => track.metadata.progression)
+  const getLastTrackItem = () => {
+    return musicFile.tracks
+      .filter(track => track.items.length > 0)
+      .map(track => track.items.slice(-1)[0])
+      .sort((a, b) => (a.begin + a.duration < b.begin + b.duration ? -1 : 1))
+      .slice(-1)[0]
   }
 
-  const findProgressionTrackNum = () => {
-    return tracks.findIndex(track => track.metadata.progression)
+  const matchNumBars = () => {
+    const lastItem = getLastTrackItem()
+    const actualNumTicks = lastItem.begin + lastItem.duration
+    const numBars = Math.ceil(actualNumTicks / getNumTicksPerBar())
+
+    musicFile.metadata.numBars = numBars
   }
 
-  const findMutedTracks = () => {
-    return tracks.filter(track => track.metadata.muted)
+  const setName = (name: string) => {
+    musicFile.metadata.name = name
   }
 
-  const findUnmutedTracks = () => {
-    return tracks.filter(track => !track.metadata.muted)
+  const setKey = (key: MFKey) => {
+    musicFile.metadata.key = key
   }
 
-  const sortTracks = () => {
-    const index = tracks.findIndex(track => track.metadata.progression)
+  const setSignature = (signature: MFSignature) => {
+    musicFile.metadata.signature = signature
 
-    if (index >= 0) {
-      const progressionTrack = tracks[index]
+    matchNumBars()
+  }
 
-      tracks.splice(index, 1)
-      tracks.push(progressionTrack)
+  const setSignatureUnsafe = (signature: MFSignature) => {
+    musicFile.metadata.signature = signature
+  }
+
+  const setUnitNoteType = (unitNoteType: MFUnitNoteType) => {
+    musicFile.metadata.unitNoteType = unitNoteType
+
+    matchNumBars()
+  }
+
+  const setUnitNoteTypeUnsafe = (unitNoteType: MFUnitNoteType) => {
+    musicFile.metadata.unitNoteType = unitNoteType
+  }
+
+  const setBPM = (bpm: number) => {
+    musicFile.metadata.bpm = bpm
+  }
+
+  const setNumBars = (numBars: number) => {
+    const lastItem = getLastTrackItem()
+
+    if (lastItem.begin + lastItem.duration <= numBars) {
+      musicFile.metadata.numBars = numBars
     }
   }
 
+  const setNumBarsUnsafe = (numBars: number) => {
+    musicFile.metadata.numBars = numBars
+  }
+
+  const findTracks = ({
+    instrument,
+    muted,
+    category,
+  }: FindTrackParams = {}) => {
+    return musicFile.tracks.filter(track => {
+      if (
+        instrument !== undefined &&
+        instrument !== track.metadata.instrument
+      ) {
+        return false
+      }
+
+      if (muted !== undefined && muted !== Boolean(track.metadata.muted)) {
+        return false
+      }
+
+      if (category !== undefined && category !== track.metadata.category) {
+        return false
+      }
+
+      return true
+    })
+  }
+
+  const findTrack = (params: FindTrackParams = {}) => {
+    const tracks = findTracks(params)
+
+    if (tracks.length === 0) {
+      return undefined
+    }
+
+    return tracks[0]
+  }
+
+  const findTrackNum = (source: MFTrack) => {
+    return musicFile.tracks.findIndex(track => track.id === source.id)
+  }
+
   const addTrack = (source: MFTrack) => {
-    tracks.push(source)
+    musicFile.tracks.push(source)
   }
 
   const deleteTrack = (source: MFTrack) => {
-    for (let i = 0; i < tracks.length; i++) {
-      if (tracks[i].id === source.id) {
-        tracks.splice(i, 1)
+    for (let i = 0; i < musicFile.tracks.length; i++) {
+      if (musicFile.tracks[i].id === source.id) {
+        musicFile.tracks.splice(i, 1)
         return
       }
     }
@@ -78,27 +179,40 @@ export const getMusicFileOps = (musicFile: MFMusicFile) => {
   const moveTrack = (source: MFTrack, newIndex: number) => {
     deleteTrack(source)
 
-    tracks.splice(newIndex, 0, source)
+    musicFile.tracks.splice(newIndex, 0, source)
   }
 
   const replaceTrack = (source: MFTrack, target: MFTrack) => {
-    const index = tracks.findIndex(track => track.id === source.id)
+    const index = musicFile.tracks.findIndex(track => track.id === source.id)
 
-    tracks[index] = target
+    musicFile.tracks[index] = target
   }
 
   return {
-    getBeatNoteType,
+    getName,
+    getKey,
+    getSignature,
     getNumBeats,
+    getBeatNoteType,
+    getUnitNoteType,
+    getBPM,
+    getNumBars,
     getNumTicksPerBar,
     getNumTicksPerBeat,
     getNumTicks,
     getTickMs,
-    findProgressionTrack,
-    findProgressionTrackNum,
-    findMutedTracks,
-    findUnmutedTracks,
-    sortTracks,
+    setName,
+    setKey,
+    setSignature,
+    setSignatureUnsafe,
+    setUnitNoteType,
+    setUnitNoteTypeUnsafe,
+    setBPM,
+    setNumBars,
+    setNumBarsUnsafe,
+    findTracks,
+    findTrack,
+    findTrackNum,
     addTrack,
     deleteTrack,
     moveTrack,
