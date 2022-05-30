@@ -23,11 +23,13 @@ export const buildTrack = ({
   id,
   metadata,
   items = [],
+  resources,
 }: Optional<MFTrack, 'id' | 'items'>): MFTrack => {
   return {
     id: id ?? generateTrackId(),
     metadata,
     items,
+    ...(resources && { resources }),
   }
 }
 
@@ -44,6 +46,20 @@ export const buildTrackItem = ({
     octave,
     begin,
     duration,
+  }
+}
+
+export const cloneTrack = (
+  track: MFTrack,
+  { id, metadata, items, resources }: Partial<MFTrack> = {},
+) => {
+  const source: MFTrack = JSON.parse(JSON.stringify(track))
+
+  return {
+    id: id ?? source.id,
+    metadata: metadata ?? source.metadata,
+    items: items ?? source.items,
+    resources: resources ?? source.resources,
   }
 }
 
@@ -224,6 +240,14 @@ export const getTrackOps = (track: MFTrack) => {
     track.metadata.category = category
   }
 
+  const deleteInstrument = () => {
+    delete track.metadata.instrument
+  }
+
+  const deleteCategory = () => {
+    delete track.metadata.instrument
+  }
+
   const findOverlappedTrackItem = (source: MFTrackItem) => {
     return track.items.find(item => isTrackItemOverlapped(source, item))
   }
@@ -295,6 +319,8 @@ export const getTrackOps = (track: MFTrack) => {
     setInstrument,
     setMuted,
     setCategory,
+    deleteInstrument,
+    deleteCategory,
     findOverlappedTrackItem,
     findOverlappedTrackItems,
     findTicksOverlappedTrackItem,

@@ -115,7 +115,7 @@ export const getMusicFileOps = (musicFile: MFMusicFile) => {
 
   const setNumBars = (numBars: number) => {
     const lastItem = getLastTrackItem()
-    const updatedNumTicks = getNumTicks() - getNumTicksPerBar()
+    const updatedNumTicks = getNumTicksPerBar() * numBars
 
     if (lastItem.begin + lastItem.duration <= updatedNumTicks) {
       musicFile.metadata.numBars = numBars

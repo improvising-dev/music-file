@@ -1,4 +1,5 @@
 import { MFKey } from './key'
+import { MFResource } from './resource'
 import { MFSignature } from './signature'
 import { MFTrack } from './track'
 import { MFUnitNoteType } from './unit-note-type'
@@ -13,4 +14,5 @@ export interface MFMusicFile {
     numBars: number
   }
   tracks: MFTrack[]
+  resources?: MFResource[]
 }
