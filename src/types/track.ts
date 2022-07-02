@@ -2,7 +2,6 @@ import { MFChord } from './chord'
 import { MFInstrument } from './instrument'
 import { MFNote } from './note'
 import { MFOctave } from './octave'
-import { MFResource } from './resource'
 
 export interface MFTrack {
   id: string
@@ -13,7 +12,6 @@ export interface MFTrack {
     category?: string
   }
   items: MFTrackItem[]
-  resources?: MFResource[]
 }
 
 export interface MFTrackItem {

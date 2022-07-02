@@ -23,13 +23,11 @@ export const buildTrack = ({
   id,
   metadata,
   items = [],
-  resources,
 }: Optional<MFTrack, 'id' | 'items'>): MFTrack => {
   return {
     id: id ?? generateTrackId(),
     metadata,
     items,
-    ...(resources && { resources }),
   }
 }
 
@@ -51,7 +49,7 @@ export const buildTrackItem = ({
 
 export const cloneTrack = (
   track: MFTrack,
-  { id, metadata, items, resources }: Partial<MFTrack> = {},
+  { id, metadata, items }: Partial<MFTrack> = {},
 ) => {
   const source: MFTrack = JSON.parse(JSON.stringify(track))
 
@@ -59,7 +57,6 @@ export const cloneTrack = (
     id: id ?? source.id,
     metadata: metadata ?? source.metadata,
     items: items ?? source.items,
-    resources: resources ?? source.resources,
   }
 }
 
@@ -128,6 +125,16 @@ export const compareTrackItem = (a: MFTrackItem, b: MFTrackItem) => {
   } else {
     return a.begin < b.begin ? -1 : 1
   }
+}
+
+export const isTrackItemEqual = (a: MFTrackItem, b: MFTrackItem) => {
+  return (
+    a.id === b.id &&
+    a.name === b.name &&
+    a.octave === b.octave &&
+    a.begin === b.begin &&
+    a.duration === b.duration
+  )
 }
 
 export const isTrackItemTicksOverlapped = (a: MFTrackItem, b: MFTrackItem) => {
@@ -207,128 +214,127 @@ export const moveTrackItemUp = (item: MFTrackItem, semitones: number) => {
   return item
 }
 
-export const getTrackOps = (track: MFTrack) => {
-  const getName = () => {
-    return track.metadata.name
+export class TrackAccessor {
+  constructor(private track: MFTrack) {}
+
+  getName() {
+    return this.track.metadata.name
   }
 
-  const getInstrument = () => {
-    return track.metadata.instrument
+  getInstrument() {
+    return this.track.metadata.instrument
   }
 
-  const getMuted = () => {
-    return Boolean(track.metadata.muted)
+  getMuted() {
+    return Boolean(this.track.metadata.muted)
   }
 
-  const getCategory = () => {
-    return track.metadata.category
+  getCategory() {
+    return this.track.metadata.category
   }
 
-  const setName = (name: string) => {
-    track.metadata.name = name
+  setName(name: string) {
+    this.track.metadata.name = name
   }
 
-  const setInstrument = (instrument: MFInstrument) => {
-    track.metadata.instrument = instrument
+  setInstrument(instrument: MFInstrument) {
+    this.track.metadata.instrument = instrument
   }
 
-  const setMuted = (muted: boolean) => {
-    track.metadata.muted = muted
+  setMuted(muted: boolean) {
+    this.track.metadata.muted = muted
   }
 
-  const setCategory = (category: string) => {
-    track.metadata.category = category
+  setCategory(category: string) {
+    this.track.metadata.category = category
   }
 
-  const deleteInstrument = () => {
-    delete track.metadata.instrument
+  deleteInstrument() {
+    delete this.track.metadata.instrument
   }
 
-  const deleteCategory = () => {
-    delete track.metadata.instrument
+  deleteCategory() {
+    delete this.track.metadata.category
   }
 
-  const findOverlappedTrackItem = (source: MFTrackItem) => {
-    return track.items.find(item => isTrackItemOverlapped(source, item))
+  findTicksOverlappedTrackItem(
+    source: MFTrackItem,
+    excludes: MFTrackItem[] = [],
+  ) {
+    return this.track.items
+      .filter(item => !excludes.some(el => isTrackItemEqual(el, item)))
+      .find(item => isTrackItemTicksOverlapped(source, item))
   }
 
-  const findOverlappedTrackItems = (source: MFTrackItem) => {
-    return track.items.filter(item => isTrackItemOverlapped(source, item))
+  findTicksOverlappedTrackItems(
+    source: MFTrackItem,
+    excludes: MFTrackItem[] = [],
+  ) {
+    return this.track.items
+      .filter(item => !excludes.some(el => isTrackItemEqual(el, item)))
+      .filter(item => isTrackItemTicksOverlapped(source, item))
   }
 
-  const findTicksOverlappedTrackItem = (source: MFTrackItem) => {
-    return track.items.find(item => isTrackItemTicksOverlapped(source, item))
+  findOverlappedTrackItem(source: MFTrackItem, excludes: MFTrackItem[] = []) {
+    return this.track.items
+      .filter(item => !excludes.some(el => isTrackItemEqual(el, item)))
+      .find(item => isTrackItemOverlapped(source, item))
   }
 
-  const findTicksOverlappedTrackItems = (source: MFTrackItem) => {
-    return track.items.filter(item => isTrackItemTicksOverlapped(source, item))
+  findOverlappedTrackItems(source: MFTrackItem, excludes: MFTrackItem[] = []) {
+    return this.track.items
+      .filter(item => !excludes.some(el => isTrackItemEqual(el, item)))
+      .filter(item => isTrackItemOverlapped(source, item))
   }
 
-  const sortTrackItems = () => {
-    return track.items.sort(compareTrackItem)
+  sortTrackItems() {
+    return this.track.items.sort(compareTrackItem)
   }
 
-  const clearTrackItems = () => {
-    track.items = []
+  clearTrackItems() {
+    this.track.items = []
   }
 
-  const addTrackItem = (source: MFTrackItem) => {
-    if (track.items.length === 0 || track.items[0].begin > source.begin) {
-      track.items.unshift(source)
+  addTrackItem(source: MFTrackItem) {
+    if (
+      this.track.items.length === 0 ||
+      this.track.items[0].begin > source.begin
+    ) {
+      this.track.items.unshift(source)
     } else {
-      for (let i = 0; i < track.items.length; i++) {
-        const item = track.items[i]
+      for (let i = 0; i < this.track.items.length; i++) {
+        const item = this.track.items[i]
 
         if (item.begin <= source.begin) {
           const result = compareTrackItem(item, source)
 
           if (result < 0) {
-            track.items.splice(i + 1, 0, source)
+            this.track.items.splice(i + 1, 0, source)
           } else {
-            track.items.splice(i, 0, source)
+            this.track.items.splice(i, 0, source)
           }
 
           return
         }
       }
 
-      track.items.push(source)
+      this.track.items.push(source)
     }
   }
 
-  const deleteTrackItem = (source: MFTrackItem) => {
-    for (let i = 0; i < track.items.length; i++) {
-      if (track.items[i].id === source.id) {
-        track.items.splice(i, 1)
+  deleteTrackItem(source: MFTrackItem) {
+    for (let i = 0; i < this.track.items.length; i++) {
+      if (this.track.items[i].id === source.id) {
+        this.track.items.splice(i, 1)
         return
       }
     }
   }
 
-  const replaceTrackItem = (source: MFTrackItem, target: MFTrackItem) => {
-    deleteTrackItem(source)
-    addTrackItem(target)
-  }
-
-  return {
-    getName,
-    getInstrument,
-    getMuted,
-    getCategory,
-    setName,
-    setInstrument,
-    setMuted,
-    setCategory,
-    deleteInstrument,
-    deleteCategory,
-    findOverlappedTrackItem,
-    findOverlappedTrackItems,
-    findTicksOverlappedTrackItem,
-    findTicksOverlappedTrackItems,
-    sortTrackItems,
-    clearTrackItems,
-    addTrackItem,
-    deleteTrackItem,
-    replaceTrackItem,
+  replaceTrackItem(source: MFTrackItem, target: MFTrackItem) {
+    this.deleteTrackItem(source)
+    this.addTrackItem(target)
   }
 }
+
+export const accessTrack = (track: MFTrack) => new TrackAccessor(track)
