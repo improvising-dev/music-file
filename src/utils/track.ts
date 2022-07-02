@@ -214,7 +214,7 @@ export const moveTrackItemUp = (item: MFTrackItem, semitones: number) => {
   return item
 }
 
-export class TrackAccessor {
+export class TrackProxy {
   constructor(private track: MFTrack) {}
 
   getName() {
@@ -337,4 +337,4 @@ export class TrackAccessor {
   }
 }
 
-export const accessTrack = (track: MFTrack) => new TrackAccessor(track)
+export const getTrackProxy = (track: MFTrack) => new TrackProxy(track)

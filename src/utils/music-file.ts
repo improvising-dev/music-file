@@ -16,7 +16,7 @@ export interface FindTrackParams {
   category?: string
 }
 
-export class MusicFileAccessor {
+export class MusicFileProxy {
   constructor(private musicFile: MFMusicFile) {}
 
   getName() {
@@ -192,5 +192,5 @@ export class MusicFileAccessor {
   }
 }
 
-export const accessMusicFile = (musicFile: MFMusicFile) =>
-  new MusicFileAccessor(musicFile)
+export const getMusicFileProxy = (musicFile: MFMusicFile) =>
+  new MusicFileProxy(musicFile)
