@@ -58,6 +58,10 @@ export class MusicFileProxy {
     return (this.musicFile.metadata as any)[key] as T
   }
 
+  getCustomValue<T>(key: string) {
+    return (this.musicFile as any)[key] as T
+  }
+
   getNumTicksPerBeat() {
     return this.getUnitNoteType() / this.getBeatNoteType()
   }
@@ -127,6 +131,10 @@ export class MusicFileProxy {
 
   setCustomMetadata(key: string, value: any) {
     Object.assign(this.musicFile.metadata, { [key]: value })
+  }
+
+  setCustomValue(key: string, value: any) {
+    Object.assign(this.musicFile, { [key]: value })
   }
 
   findTracks({ id, instrument, muted, category }: FindTrackParams = {}) {

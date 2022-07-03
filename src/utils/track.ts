@@ -236,6 +236,10 @@ export class TrackProxy {
     return (this.track.metadata as any)[key] as T
   }
 
+  getCustomValue<T>(key: string) {
+    return (this.track as any)[key] as T
+  }
+
   setName(name: string) {
     this.track.metadata.name = name
   }
@@ -254,6 +258,10 @@ export class TrackProxy {
 
   setCustomMetadata(key: string, value: any) {
     Object.assign(this.track.metadata, { [key]: value })
+  }
+
+  setCustomValue(key: string, value: any) {
+    Object.assign(this.track, { [key]: value })
   }
 
   deleteInstrument() {
