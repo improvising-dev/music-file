@@ -1,16 +1,17 @@
 import { MFChord } from './chord'
-import { MFInstrument } from './instrument'
 import { MFNote } from './note'
 import { MFOctave } from './octave'
 
+export interface MFTrackMetadata {
+  name: string
+  instrument?: string
+  muted?: boolean
+  category?: string
+}
+
 export interface MFTrack {
   id: string
-  metadata: {
-    name: string
-    instrument?: MFInstrument
-    muted?: boolean
-    category?: string
-  }
+  metadata: MFTrackMetadata
   items: MFTrackItem[]
 }
 

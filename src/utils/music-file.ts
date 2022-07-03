@@ -1,4 +1,3 @@
-import { MFInstrument } from '../types/instrument'
 import { MFKey } from '../types/key'
 import { MFMusicFile } from '../types/music-file'
 import { MFSignature } from '../types/signature'
@@ -11,13 +10,17 @@ export const cloneMusicFile = (musicFile: MFMusicFile): MFMusicFile => {
 
 export interface FindTrackParams {
   id?: string
-  instrument?: MFInstrument
+  instrument?: string
   muted?: boolean
   category?: string
 }
 
 export class MusicFileProxy {
   constructor(private musicFile: MFMusicFile) {}
+
+  getVersion() {
+    return this.musicFile.metadata.version
+  }
 
   getName() {
     return this.musicFile.metadata.name
@@ -49,6 +52,10 @@ export class MusicFileProxy {
 
   getNumBars() {
     return this.musicFile.metadata.numBars
+  }
+
+  getCustomMetadata<T>(key: string) {
+    return (this.musicFile.metadata as any)[key] as T
   }
 
   getNumTicksPerBeat() {
@@ -116,6 +123,10 @@ export class MusicFileProxy {
 
   setNumBarsUnsafe(numBars: number) {
     this.musicFile.metadata.numBars = numBars
+  }
+
+  setCustomMetadata(key: string, value: any) {
+    Object.assign(this.musicFile.metadata, { [key]: value })
   }
 
   findTracks({ id, instrument, muted, category }: FindTrackParams = {}) {

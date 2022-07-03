@@ -2,7 +2,6 @@ import { hasInteraction } from '../common/algorithm'
 import { MusicFileError } from '../common/error'
 import { generateRandomId } from '../common/random'
 import { NOTES, NOTE_INDEX_MAP } from '../constants/note'
-import { MFInstrument } from '../types/instrument'
 import {
   MFChordTrackItem,
   MFNoteTrackItem,
@@ -233,11 +232,15 @@ export class TrackProxy {
     return this.track.metadata.category
   }
 
+  getCustomMetadata<T>(key: string) {
+    return (this.track.metadata as any)[key] as T
+  }
+
   setName(name: string) {
     this.track.metadata.name = name
   }
 
-  setInstrument(instrument: MFInstrument) {
+  setInstrument(instrument: string) {
     this.track.metadata.instrument = instrument
   }
 
@@ -247,6 +250,10 @@ export class TrackProxy {
 
   setCategory(category: string) {
     this.track.metadata.category = category
+  }
+
+  setCustomMetadata(key: string, value: any) {
+    Object.assign(this.track.metadata, { [key]: value })
   }
 
   deleteInstrument() {

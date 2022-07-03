@@ -2,6 +2,7 @@ import { MFMusicFile } from '../types/music-file'
 
 export const DEFAULT_MUSIC_FILE: MFMusicFile = {
   metadata: {
+    version: 'v1',
     name: 'Untitled',
     key: 'C',
     signature: [4, 4],
