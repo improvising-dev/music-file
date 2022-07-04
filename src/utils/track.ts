@@ -2,6 +2,7 @@ import { hasInteraction } from '../common/algorithm'
 import { MusicFileError } from '../common/error'
 import { generateRandomId } from '../common/random'
 import { NOTES, NOTE_INDEX_MAP } from '../constants/note'
+import { MFInstrument } from '../types/instrument'
 import {
   MFChordTrackItem,
   MFNoteTrackItem,
@@ -244,7 +245,7 @@ export class TrackProxy {
     this.track.metadata.name = name
   }
 
-  setInstrument(instrument: string) {
+  setInstrument(instrument: MFInstrument) {
     this.track.metadata.instrument = instrument
   }
 
