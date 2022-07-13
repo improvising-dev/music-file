@@ -15,8 +15,36 @@ export interface FindTrackParams {
   category?: string
 }
 
+export type MusicFileProxyObserver = (proxy: MusicFileProxy) => void
+
 export class MusicFileProxy {
-  constructor(private musicFile: MFMusicFile) {}
+  private observers: MusicFileProxyObserver[]
+
+  constructor(private musicFile: MFMusicFile) {
+    this.observers = []
+  }
+
+  observe(observer: MusicFileProxyObserver) {
+    this.observers.push(observer)
+
+    return () => {
+      this.observers = this.observers.filter(item => item !== observer)
+    }
+  }
+
+  notifyChanges() {
+    this.observers.forEach(observer => observer(this))
+
+    return this
+  }
+
+  values() {
+    return this.musicFile
+  }
+
+  shadowValues() {
+    return { ...this.musicFile }
+  }
 
   getVersion() {
     return this.musicFile.metadata.version
@@ -28,6 +56,31 @@ export class MusicFileProxy {
 
   getKey() {
     return this.musicFile.metadata.key
+  }
+
+  getTempo() {
+    const { metadata } = this.musicFile
+    const { signature, unitNoteType, bpm, numBars } = metadata
+
+    const [numBeats, beatNoteType] = signature
+
+    const numTicksPerBeat = unitNoteType / beatNoteType
+    const numTicksPerBar = numBeats * numTicksPerBeat
+    const numTicks = numBars * numTicksPerBar
+    const tickMs = (60 * 1000) / (numTicksPerBeat * bpm)
+
+    return {
+      signature,
+      numBeats,
+      beatNoteType,
+      unitNoteType,
+      bpm,
+      numBars,
+      numTicksPerBeat,
+      numTicksPerBar,
+      numTicks,
+      tickMs,
+    }
   }
 
   getSignature() {
@@ -79,62 +132,90 @@ export class MusicFileProxy {
   }
 
   getLastTrackItem() {
-    return this.musicFile.tracks
+    const items = this.musicFile.tracks
       .filter(track => track.items.length > 0)
       .map(track => track.items.slice(-1)[0])
       .sort((a, b) => (a.begin + a.duration < b.begin + b.duration ? -1 : 1))
-      .slice(-1)[0]
+      .slice(-1)
+
+    if (items.length === 0) {
+      return null
+    }
+
+    return items[0]
   }
 
   setName(name: string) {
     this.musicFile.metadata.name = name
+
+    return this
   }
 
   setKey(key: MFKey) {
     this.musicFile.metadata.key = key
+
+    return this
   }
 
   setSignature(signature: MFSignature) {
     this.musicFile.metadata.signature = signature
-    this.ensureMatchedNumbers()
+    this.ensureMatchedNumBars()
+
+    return this
   }
 
   setSignatureUnsafe(signature: MFSignature) {
     this.musicFile.metadata.signature = signature
+
+    return this
   }
 
   setUnitNoteType(unitNoteType: MFUnitNoteType) {
     this.musicFile.metadata.unitNoteType = unitNoteType
-    this.ensureMatchedNumbers()
+    this.ensureMatchedNumBars()
+
+    return this
   }
 
   setUnitNoteTypeUnsafe(unitNoteType: MFUnitNoteType) {
     this.musicFile.metadata.unitNoteType = unitNoteType
+
+    return this
   }
 
   setBPM(bpm: number) {
     this.musicFile.metadata.bpm = bpm
+
+    return this
   }
 
   setNumBars(numBars: number) {
     const lastItem = this.getLastTrackItem()
     const updatedNumTicks = this.getNumTicksPerBar() * numBars
 
-    if (lastItem.begin + lastItem.duration <= updatedNumTicks) {
+    if (!lastItem || lastItem.begin + lastItem.duration <= updatedNumTicks) {
       this.musicFile.metadata.numBars = numBars
     }
+
+    return this
   }
 
   setNumBarsUnsafe(numBars: number) {
     this.musicFile.metadata.numBars = numBars
+
+    return this
   }
 
   setCustomMetadata(key: string, value: any) {
     Object.assign(this.musicFile.metadata, { [key]: value })
+
+    return this
   }
 
   setCustomValue(key: string, value: any) {
     Object.assign(this.musicFile, { [key]: value })
+
+    return this
   }
 
   findTracks({ id, instrument, muted, category }: FindTrackParams = {}) {
@@ -166,7 +247,7 @@ export class MusicFileProxy {
     const tracks = this.findTracks(params)
 
     if (tracks.length === 0) {
-      return undefined
+      return null
     }
 
     return tracks[0]
@@ -178,38 +259,55 @@ export class MusicFileProxy {
     return this.musicFile.tracks.findIndex(track => track === source)
   }
 
-  addTrack(source: MFTrack) {
-    this.musicFile.tracks.push(source)
+  addTrack(source: MFTrack, insertPos?: number) {
+    if (insertPos) {
+      this.musicFile.tracks.splice(insertPos, 0, source)
+    } else {
+      this.musicFile.tracks.push(source)
+    }
+
+    return this
   }
 
-  deleteTrack(source: MFTrack) {
-    for (let i = 0; i < this.musicFile.tracks.length; i++) {
-      if (this.musicFile.tracks[i].id === source.id) {
-        this.musicFile.tracks.splice(i, 1)
-        return
+  deleteTrack(source: MFTrack | number) {
+    if (typeof source === 'number') {
+      this.musicFile.tracks.splice(source, 1)
+    } else {
+      for (let i = 0; i < this.musicFile.tracks.length; i++) {
+        if (this.musicFile.tracks[i].id === source.id) {
+          this.musicFile.tracks.splice(i, 1)
+          break
+        }
       }
     }
+
+    return this
   }
 
-  moveTrack(source: MFTrack, newIndex: number) {
-    this.deleteTrack(source)
-    this.musicFile.tracks.splice(newIndex, 0, source)
+  replaceTrack(source: MFTrack | number, target: MFTrack) {
+    const index =
+      typeof source === 'number' ? source : this.findTrackNum({ id: source.id })
+
+    if (index >= 0 && index < this.musicFile.tracks.length) {
+      this.musicFile.tracks[index] = target
+    }
+
+    return this
   }
 
-  replaceTrack(source: MFTrack, target: MFTrack) {
-    const index = this.findTrackNum({ id: source.id })
-
-    this.musicFile.tracks[index] = target
-  }
-
-  ensureMatchedNumbers = () => {
+  ensureMatchedNumBars() {
     const lastItem = this.getLastTrackItem()
-    const actualNumTicks = lastItem.begin + lastItem.duration
-    const numBars = Math.ceil(actualNumTicks / this.getNumTicksPerBar())
 
-    this.musicFile.metadata.numBars = numBars
+    if (lastItem) {
+      const leastNumTicks = lastItem.begin + lastItem.duration
+      const numBars = Math.ceil(leastNumTicks / this.getNumTicksPerBar())
+
+      this.musicFile.metadata.numBars = numBars
+    }
+
+    return this
   }
 }
 
-export const getMusicFileProxy = (musicFile: MFMusicFile) =>
+export const useMusicFileProxy = (musicFile: MFMusicFile) =>
   new MusicFileProxy(musicFile)

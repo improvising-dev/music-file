@@ -50,7 +50,7 @@ export const buildTrackItem = ({
 export const cloneTrack = (
   track: MFTrack,
   { id, metadata, items }: Partial<MFTrack> = {},
-) => {
+): MFTrack => {
   const source: MFTrack = JSON.parse(JSON.stringify(track))
 
   return {
@@ -137,17 +137,31 @@ export const isTrackItemEqual = (a: MFTrackItem, b: MFTrackItem) => {
   )
 }
 
+export const isTrackItemConsecutive = (
+  a: MFTrackItem,
+  b: MFTrackItem,
+  { sequential = true }: { sequential?: boolean } = {},
+) => {
+  if (sequential) {
+    return a.begin + a.duration === b.begin
+  }
+
+  return a.begin + a.duration === b.begin || b.begin + b.duration === a.begin
+}
+
 export const isTrackItemTicksOverlapped = (a: MFTrackItem, b: MFTrackItem) => {
   if (a.id === b.id) {
     return false
   }
 
-  const rangeA = [a.begin, a.begin + a.duration]
-  const rangeB = [b.begin, b.begin + b.duration]
+  const ranges = [
+    [a.begin, a.begin + a.duration],
+    [b.begin, b.begin + b.duration],
+  ]
 
   return (
-    (rangeA[0] <= rangeB[0] && rangeA[1] > rangeB[0]) ||
-    (rangeB[0] <= rangeA[0] && rangeB[1] > rangeA[0])
+    (ranges[0][0] <= ranges[1][0] && ranges[0][1] > ranges[1][0]) ||
+    (ranges[1][0] <= ranges[0][0] && ranges[1][1] > ranges[0][0])
   )
 }
 
@@ -184,15 +198,11 @@ export const expandTrackItemLeft = (item: MFTrackItem, ticks: number) => {
 }
 
 export const expandTrackItemRight = (item: MFTrackItem, ticks: number) => {
-  return cloneTrackItem(item, {
-    duration: item.duration + ticks,
-  })
+  return cloneTrackItem(item, { duration: item.duration + ticks })
 }
 
 export const moveTrackItemRight = (item: MFTrackItem, ticks: number) => {
-  return cloneTrackItem(item, {
-    begin: item.begin + ticks,
-  })
+  return cloneTrackItem(item, { begin: item.begin + ticks })
 }
 
 export const moveTrackItemUp = (item: MFTrackItem, semitones: number) => {
@@ -202,20 +212,49 @@ export const moveTrackItemUp = (item: MFTrackItem, semitones: number) => {
     const delta = Math.floor(index / NOTES.length)
     const octave = ensureValidOctave(item.octave + delta)
 
-    return buildTrackItem({
-      id: item.id,
-      name,
-      octave,
-      begin: item.begin,
-      duration: item.duration,
-    })
+    return cloneTrackItem(item, { name, octave })
+  }
+
+  if (isChordTrackItem(item) && semitones % 12 === 0) {
+    const delta = Math[semitones > 0 ? 'floor' : 'ceil'](semitones / 12)
+    const octave = ensureValidOctave(delta)
+
+    return cloneTrackItem(item, { octave })
   }
 
   return item
 }
 
+export type TrackProxyObserver = (proxy: TrackProxy) => void
+
 export class TrackProxy {
-  constructor(private track: MFTrack) {}
+  private observers: TrackProxyObserver[]
+
+  constructor(private track: MFTrack) {
+    this.observers = []
+  }
+
+  observe(observer: TrackProxyObserver) {
+    this.observers.push(observer)
+
+    return () => {
+      this.observers = this.observers.filter(item => item !== observer)
+    }
+  }
+
+  notifyChanges() {
+    this.observers.forEach(observer => observer(this))
+
+    return this
+  }
+
+  values() {
+    return this.track
+  }
+
+  shadowValues() {
+    return { ...this.track }
+  }
 
   getName() {
     return this.track.metadata.name
@@ -243,72 +282,62 @@ export class TrackProxy {
 
   setName(name: string) {
     this.track.metadata.name = name
+
+    return this
   }
 
   setInstrument(instrument: MFInstrument) {
     this.track.metadata.instrument = instrument
+
+    return this
   }
 
   setMuted(muted: boolean) {
     this.track.metadata.muted = muted
+
+    return this
   }
 
   setCategory(category: string) {
     this.track.metadata.category = category
+
+    return this
   }
 
   setCustomMetadata(key: string, value: any) {
     Object.assign(this.track.metadata, { [key]: value })
+
+    return this
   }
 
   setCustomValue(key: string, value: any) {
     Object.assign(this.track, { [key]: value })
+
+    return this
   }
 
   deleteInstrument() {
     delete this.track.metadata.instrument
+
+    return this
   }
 
   deleteCategory() {
     delete this.track.metadata.category
-  }
 
-  findTicksOverlappedTrackItem(
-    source: MFTrackItem,
-    excludes: MFTrackItem[] = [],
-  ) {
-    return this.track.items
-      .filter(item => !excludes.some(el => isTrackItemEqual(el, item)))
-      .find(item => isTrackItemTicksOverlapped(source, item))
-  }
-
-  findTicksOverlappedTrackItems(
-    source: MFTrackItem,
-    excludes: MFTrackItem[] = [],
-  ) {
-    return this.track.items
-      .filter(item => !excludes.some(el => isTrackItemEqual(el, item)))
-      .filter(item => isTrackItemTicksOverlapped(source, item))
-  }
-
-  findOverlappedTrackItem(source: MFTrackItem, excludes: MFTrackItem[] = []) {
-    return this.track.items
-      .filter(item => !excludes.some(el => isTrackItemEqual(el, item)))
-      .find(item => isTrackItemOverlapped(source, item))
-  }
-
-  findOverlappedTrackItems(source: MFTrackItem, excludes: MFTrackItem[] = []) {
-    return this.track.items
-      .filter(item => !excludes.some(el => isTrackItemEqual(el, item)))
-      .filter(item => isTrackItemOverlapped(source, item))
+    return this
   }
 
   sortTrackItems() {
-    return this.track.items.sort(compareTrackItem)
+    this.track.items.sort(compareTrackItem)
+
+    return this
   }
 
   clearTrackItems() {
     this.track.items = []
+
+    return this
   }
 
   addTrackItem(source: MFTrackItem) {
@@ -330,27 +359,33 @@ export class TrackProxy {
             this.track.items.splice(i, 0, source)
           }
 
-          return
+          return this
         }
       }
 
       this.track.items.push(source)
     }
+
+    return this
   }
 
   deleteTrackItem(source: MFTrackItem) {
     for (let i = 0; i < this.track.items.length; i++) {
       if (this.track.items[i].id === source.id) {
         this.track.items.splice(i, 1)
-        return
+        break
       }
     }
+
+    return this
   }
 
   replaceTrackItem(source: MFTrackItem, target: MFTrackItem) {
     this.deleteTrackItem(source)
     this.addTrackItem(target)
+
+    return this
   }
 }
 
-export const getTrackProxy = (track: MFTrack) => new TrackProxy(track)
+export const useTrackProxy = (track: MFTrack) => new TrackProxy(track)

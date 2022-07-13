@@ -1,12 +1,12 @@
 {
   "name": "@improvising/music-file",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "main": "dist/index.js",
   "license": "MIT",
   "author": "Improvising",
   "description": "Typing and utils for MusicFile format",
   "devDependencies": {
-    "@types/node": "^17.0.36",
+    "@types/node": "^18.0.3",
     "rimraf": "^3.0.2",
     "typescript": "^4.7.2"
   },
