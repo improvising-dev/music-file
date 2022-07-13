@@ -309,5 +309,5 @@ export class MusicFileProxy {
   }
 }
 
-export const useMusicFileProxy = (musicFile: MFMusicFile) =>
+export const getMusicFileProxy = (musicFile: MFMusicFile) =>
   new MusicFileProxy(musicFile)

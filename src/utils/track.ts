@@ -388,4 +388,4 @@ export class TrackProxy {
   }
 }
 
-export const useTrackProxy = (track: MFTrack) => new TrackProxy(track)
+export const getTrackProxy = (track: MFTrack) => new TrackProxy(track)
