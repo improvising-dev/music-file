@@ -145,6 +145,19 @@ export class MusicFileProxy {
     return items[0]
   }
 
+  getMatchedNumBars() {
+    const lastItem = this.getLastTrackItem()
+
+    if (lastItem === null) {
+      return 0
+    }
+
+    const leastNumTicks = lastItem.begin + lastItem.duration
+    const numBars = Math.ceil(leastNumTicks / this.getNumTicksPerBar())
+
+    return numBars
+  }
+
   setName(name: string) {
     this.musicFile.metadata.name = name
 
@@ -214,6 +227,22 @@ export class MusicFileProxy {
 
   setCustomValue(key: string, value: any) {
     Object.assign(this.musicFile, { [key]: value })
+
+    return this
+  }
+
+  ensureLeastNumBars() {
+    const numBars = this.getMatchedNumBars()
+
+    if (this.musicFile.metadata.numBars < numBars) {
+      this.musicFile.metadata.numBars = numBars
+    }
+
+    return this
+  }
+
+  ensureMatchedNumBars() {
+    this.musicFile.metadata.numBars = this.getMatchedNumBars()
 
     return this
   }
@@ -290,19 +319,6 @@ export class MusicFileProxy {
 
     if (index >= 0 && index < this.musicFile.tracks.length) {
       this.musicFile.tracks[index] = target
-    }
-
-    return this
-  }
-
-  ensureMatchedNumBars() {
-    const lastItem = this.getLastTrackItem()
-
-    if (lastItem) {
-      const leastNumTicks = lastItem.begin + lastItem.duration
-      const numBars = Math.ceil(leastNumTicks / this.getNumTicksPerBar())
-
-      this.musicFile.metadata.numBars = numBars
     }
 
     return this
