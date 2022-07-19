@@ -347,7 +347,7 @@ export class TrackProxy {
     ) {
       this.track.items.unshift(source)
     } else {
-      let index = this.track.items.length
+      let index = this.track.items.length - 1
 
       while (index >= 0) {
         const item = this.track.items[index]
