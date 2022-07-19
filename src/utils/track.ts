@@ -354,9 +354,9 @@ export class TrackProxy {
           const result = compareTrackItem(item, source)
 
           if (result < 0) {
-            this.track.items.splice(i + 1, 0, source)
-          } else {
             this.track.items.splice(i, 0, source)
+          } else {
+            this.track.items.splice(i + 1, 0, source)
           }
 
           return this
