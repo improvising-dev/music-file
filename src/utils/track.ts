@@ -347,23 +347,27 @@ export class TrackProxy {
     ) {
       this.track.items.unshift(source)
     } else {
-      for (let i = 0; i < this.track.items.length; i++) {
-        const item = this.track.items[i]
+      let index = this.track.items.length
+
+      while (index >= 0) {
+        const item = this.track.items[index]
 
         if (item.begin <= source.begin) {
           const result = compareTrackItem(item, source)
 
           if (result < 0) {
-            this.track.items.splice(i, 0, source)
+            this.track.items.splice(index + 1, 0, source)
           } else {
-            this.track.items.splice(i + 1, 0, source)
+            this.track.items.splice(index, 0, source)
           }
 
           return this
         }
+
+        index--
       }
 
-      this.track.items.push(source)
+      this.track.items.unshift(source)
     }
 
     return this
