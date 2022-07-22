@@ -18,33 +18,7 @@ export interface FindTrackParams {
 export type MusicFileProxyObserver = (proxy: MusicFileProxy) => void
 
 export class MusicFileProxy {
-  private observers: MusicFileProxyObserver[]
-
-  constructor(private musicFile: MFMusicFile) {
-    this.observers = []
-  }
-
-  observe(observer: MusicFileProxyObserver) {
-    this.observers.push(observer)
-
-    return () => {
-      this.observers = this.observers.filter(item => item !== observer)
-    }
-  }
-
-  notifyChanges() {
-    this.observers.forEach(observer => observer(this))
-
-    return this
-  }
-
-  values() {
-    return this.musicFile
-  }
-
-  shadowValues() {
-    return { ...this.musicFile }
-  }
+  constructor(private musicFile: MFMusicFile) {}
 
   getVersion() {
     return this.musicFile.metadata.version
@@ -323,7 +297,24 @@ export class MusicFileProxy {
 
     return this
   }
+
+  swapTrack(source: MFTrack | number, trackNum: number) {
+    const index =
+      typeof source === 'number' ? source : this.findTrackNum({ id: source.id })
+
+    if (index >= 0 && index < this.musicFile.tracks.length) {
+      const current = this.musicFile.tracks[index]
+      const swap = this.musicFile.tracks[trackNum]
+
+      if (swap) {
+        this.musicFile.tracks[index] = swap
+        this.musicFile.tracks[trackNum] = current
+      }
+    }
+
+    return this
+  }
 }
 
-export const getMusicFileProxy = (musicFile: MFMusicFile) =>
+export const createMusicFileProxy = (musicFile: MFMusicFile) =>
   new MusicFileProxy(musicFile)

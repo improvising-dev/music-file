@@ -228,33 +228,7 @@ export const moveTrackItemUp = (item: MFTrackItem, semitones: number) => {
 export type TrackProxyObserver = (proxy: TrackProxy) => void
 
 export class TrackProxy {
-  private observers: TrackProxyObserver[]
-
-  constructor(private track: MFTrack) {
-    this.observers = []
-  }
-
-  observe(observer: TrackProxyObserver) {
-    this.observers.push(observer)
-
-    return () => {
-      this.observers = this.observers.filter(item => item !== observer)
-    }
-  }
-
-  notifyChanges() {
-    this.observers.forEach(observer => observer(this))
-
-    return this
-  }
-
-  values() {
-    return this.track
-  }
-
-  shadowValues() {
-    return { ...this.track }
-  }
+  constructor(private track: MFTrack) {}
 
   getName() {
     return this.track.metadata.name
@@ -392,4 +366,4 @@ export class TrackProxy {
   }
 }
 
-export const getTrackProxy = (track: MFTrack) => new TrackProxy(track)
+export const createTrackProxy = (track: MFTrack) => new TrackProxy(track)

@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@types/node@^18.0.3":
-  version "18.0.3"
-  resolved "https://registry.npmjs.org/@types/node/-/node-18.0.3.tgz#463fc47f13ec0688a33aec75d078a0541a447199"
-  integrity sha512-HzNRZtp4eepNitP+BD6k2L6DROIDG4Q0fm4x+dwfsr6LGmROENnok75VGw40628xf+iR24WeMFcHuuBDUAzzsQ==
+"@types/node@^18.0.6":
+  version "18.0.6"
+  resolved "https://registry.npmjs.org/@types/node/-/node-18.0.6.tgz#0ba49ac517ad69abe7a1508bc9b3a5483df9d5d7"
+  integrity sha512-/xUq6H2aQm261exT6iZTMifUySEt4GR5KX8eYyY+C4MSNPqSh9oNIP7tz2GLKTlFaiBbgZNxffoR3CVRG+cljw==
 
 balanced-match@^1.0.0:
   version "1.0.2"
@@ -81,10 +81,10 @@ rimraf@^3.0.2:
   dependencies:
     glob "^7.1.3"
 
-typescript@^4.7.2:
-  version "4.7.2"
-  resolved "https://registry.npmjs.org/typescript/-/typescript-4.7.2.tgz#1f9aa2ceb9af87cca227813b4310fff0b51593c4"
-  integrity sha512-Mamb1iX2FDUpcTRzltPxgWMKy3fhg0TN378ylbktPGPK/99KbDtMQ4W1hwgsbPAsG3a0xKa1vmw4VKZQbkvz5A==
+typescript@^4.7.4:
+  version "4.7.4"
+  resolved "https://registry.npmjs.org/typescript/-/typescript-4.7.4.tgz#1a88596d1cf47d59507a1bcdfb5b9dfe4d488235"
+  integrity sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ==
 
 wrappy@1:
   version "1.0.2"

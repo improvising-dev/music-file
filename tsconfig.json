@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "removeComments": true,
     "lib": ["dom", "dom.iterable", "esnext"],
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -10,10 +10,9 @@
     "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "module": "commonjs",
     "moduleResolution": "node",
     "declaration": true,
-    "outDir": "dist"
+    "declarationDir": "dist/types"
   },
-  "include": ["src"]
+  "include": ["src/**/*"]
 }
