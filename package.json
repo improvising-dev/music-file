@@ -1,7 +1,6 @@
 {
   "name": "@improvising/music-file",
-  "version": "1.17.0",
-  "type": "module",
+  "version": "1.17.1",
   "module": "./dist/esm/index.js",
   "main": "./dist/commonjs/index.js",
   "types": "./dist/types/index.d.ts",
