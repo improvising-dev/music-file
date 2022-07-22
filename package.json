@@ -1,6 +1,7 @@
 {
   "name": "@improvising/music-file",
-  "version": "1.17.1",
+  "version": "1.17.2",
+  "type": "module",
   "module": "./dist/esm/index.js",
   "main": "./dist/commonjs/index.js",
   "types": "./dist/types/index.d.ts",
@@ -21,7 +22,7 @@
   "dependencies": {},
   "scripts": {
     "build:commonjs": "tsc --project tsconfig.commonjs.json",
-    "build:esm": "tsc --project tsconfig.esm.json",
+    "build:esm": "tsc --project tsconfig.esm.json && node fix-esm-import-paths",
     "build": "rimraf dist && yarn build:commonjs && yarn build:esm"
   }
 }

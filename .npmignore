@@ -2,5 +2,9 @@
 .gitignore
 .prettierrc
 .vscode
+fix-esm-import-paths.js
 src
 tsconfig.json
+tsconfig.commonjs.json
+tsconfig.esm.json
+yarn.lock
